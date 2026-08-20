@@ -51,8 +51,15 @@ internal fun extractToTempIfDifferent(jarPath: String): File? {
                 deleteOnExit()
             }
 
-        // Copy the file directly if it is not a JAR
-        Files.copy(jarFile.toPath(), tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
+        // Copy the file via streams: Files.copy(Path, Path) maps to CopyFileExW on Windows,
+        // which tries to carry the EFS "encrypted" attribute over to the destination and fails
+        // with ERROR_ENCRYPTION_FAILED when the destination cannot be encrypted (e.g. sources
+        // inside WindowsApps on a non-system volume, which Windows encrypts with EFS).
+        jarFile.inputStream().use { input ->
+            tempFile.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
         return tempFile
     }
 

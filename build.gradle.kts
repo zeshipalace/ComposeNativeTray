@@ -18,7 +18,8 @@ val version =
         val tag = ref.removePrefix("refs/tags/")
         if (tag.startsWith("v")) tag.substring(1) else tag
     } else {
-        "dev"
+        // Xuncorp fork: local-only builds published to mavenLocal
+        "2.1.0-xuncorp.1"
     }
 
 repositories {
